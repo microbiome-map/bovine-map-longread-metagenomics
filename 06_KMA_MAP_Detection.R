@@ -30,123 +30,127 @@ local({
     library(patchwork)
   })
 
-  input_file <- file.path("data", "map_detection", "map_detection_master.xlsx")
+  metadata_file <- file.path("data", "metadata.txt")
+  kma_file <- file.path("data", "map_detection", "kma_IS900_F57_neu.xlsx")
+  s1_file <- file.path("data", "map_detection", "S1_Sample_Master.xlsx")
   output_dir <- "MAP_detection_analysis"
 
-  if (!file.exists(input_file)) {
-    stop(
-      "Required analysis workbook not found: ", input_file,
-      "\nThe deposited kma_IS900_F57_neu.xlsx contains raw KMA hits only; ",
-      "script 06 also needs the matched qPCR/culture and sequencing-QC ",
-      "tables in sheets Samples, MAP Evidence (KMA), and Sequencing QC."
-    )
+  for (input in c(metadata_file, kma_file, s1_file)) {
+    if (!file.exists(input)) {
+      stop("Missing required input: ", input,
+           "\nS1_Sample_Master.xlsx is Supplementary Table S1 from the publication; ",
+           "place a copy under data/map_detection/ after downloading it from the journal.")
+    }
   }
 
-  dir.create(output_dir, showWarnings = FALSE)
+  dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
   to_numeric <- function(x) {
-    suppressWarnings(
-      as.numeric(
-        gsub(",", ".", as.character(x), fixed = TRUE)
-      )
-    )
+    suppressWarnings(as.numeric(gsub(",", ".", as.character(x), fixed = TRUE)))
   }
 
   is_positive <- function(x) {
-    tolower(trimws(as.character(x))) %in%
-      c("yes", "positive", "true", "1")
+    tolower(trimws(as.character(x))) %in% c("yes", "positive", "true", "1")
   }
 
-  samples <- read_excel(
-    input_file,
-    sheet = "Samples"
-  )
-
-  sheet_names <- excel_sheets(input_file)
-
-  kma_sheet <- sheet_names[
-    trimws(sheet_names) == "MAP Evidence (KMA)"
-  ]
-
-  if (length(kma_sheet) != 1) {
-    stop("Could not uniquely identify MAP Evidence (KMA) sheet.")
+  metadata <- readr::read_tsv(metadata_file,
+                              col_types = readr::cols(.default = readr::col_character()),
+                              show_col_types = FALSE)
+  if (!all(c("SAMPLE_ID", "Animal_ID") %in% names(metadata))) {
+    stop("Metadata must contain SAMPLE_ID and Animal_ID.")
   }
+  id_lookup <- dplyr::bind_rows(
+    metadata %>% transmute(raw_id = trimws(Animal_ID), id = trimws(SAMPLE_ID)),
+    metadata %>% transmute(raw_id = trimws(SAMPLE_ID), id = trimws(SAMPLE_ID))
+  ) %>%
+    filter(!is.na(raw_id), nzchar(raw_id)) %>%
+    distinct(raw_id, .keep_all = TRUE)
+  if (anyDuplicated(id_lookup$raw_id)) stop("Duplicate raw KMA identifiers in metadata.")
 
-  kma <- read_excel(
-    input_file,
-    sheet = kma_sheet
-  )
-
-  qc <- read_excel(
-    input_file,
-    sheet = "Sequencing QC"
-  )
-
-  dat <- samples %>%
+  # S1 is published separately with the article, not part of the Zenodo archive.
+  s1 <- readxl::read_excel(s1_file, sheet = 1, skip = 4)
+  s1_fields <- c("Sample ID", "Country of origin", "Study group",
+                 "qPCR result", "qPCR Ct", "Culture result",
+                 "Host-depleted yield (Gbp)")
+  if (!all(s1_fields %in% names(s1))) {
+    stop("Published S1 has unexpected column names. Expected: ",
+         paste(s1_fields, collapse = ", "))
+  }
+  samples <- s1 %>%
     transmute(
-      id = `Sample ID`,
-      country = Country,
-      group = `Clinical group`,
+      id = trimws(as.character(`Sample ID`)),
+      country = as.character(`Country of origin`),
+      group = as.character(`Study group`),
       qpcr = as.character(`qPCR result`),
       ct = to_numeric(`qPCR Ct`),
-      culture = as.character(`Culture result`)
+      culture = as.character(`Culture result`),
+      yield_gbp = to_numeric(`Host-depleted yield (Gbp)`)
     ) %>%
-    left_join(
-      kma %>%
-        transmute(
-          id = `Sample ID`,
+    filter(grepl("^(SW|ZA)_(NEG|SUB|POS)_[0-9]+$", id),
+           !id %in% c("SW_POS_00", "SW_POS_01"))
+  if (anyDuplicated(samples$id)) stop("Duplicate sample IDs in S1.")
 
-          is900 = is_positive(`IS900 hit reported`),
-          f57 = is_positive(`F57 hit reported`),
-
-          is900_depth = to_numeric(`IS900 depth (×)`),
-          f57_depth = to_numeric(`F57 depth (×)`),
-
-          is900_breadth = to_numeric(`IS900 breadth (%)`),
-          f57_breadth = to_numeric(`F57 breadth (%)`)
-        ),
-      by = "id"
-    ) %>%
-    left_join(
-      qc %>%
-        transmute(
-          id = `Sample ID`,
-          yield_gbp = to_numeric(
-            `Host-removed Yield (Gbp)`
-          )
-        ),
-      by = "id"
-    ) %>%
-    filter(
-      !id %in% c("SW_POS_00", "SW_POS_01")
-    ) %>%
+  # Raw KMA spreadsheet consists of repeated per-sample reports.
+  kma_columns <- c("result_file", "template", "score", "expected",
+                   "template_length", "template_identity", "template_coverage",
+                   "query_identity", "query_coverage", "depth", "q_value", "p_value")
+  raw_kma <- readxl::read_excel(kma_file, sheet = 1, col_names = FALSE,
+                                range = readxl::cell_cols("A:L"))
+  names(raw_kma) <- kma_columns
+  kma_hits <- raw_kma %>%
+    filter(grepl("IS900|F57", as.character(template))) %>%
     mutate(
-      conventional_positive =
-        is_positive(qpcr) | is_positive(culture),
+      raw_id = sub("_kma_IS900_F57.*$", "", as.character(result_file)),
+      marker = case_when(grepl("IS900", template) ~ "is900",
+                         grepl("F57", template) ~ "f57",
+                         TRUE ~ NA_character_),
+      breadth = to_numeric(template_coverage),
+      depth = to_numeric(depth)
+    ) %>%
+    left_join(id_lookup, by = "raw_id")
+  if (anyNA(kma_hits$id)) {
+    stop("Raw KMA sample identifiers not matched in metadata: ",
+         paste(unique(kma_hits$raw_id[is.na(kma_hits$id)]), collapse = ", "))
+  }
+  if (anyDuplicated(paste(kma_hits$id, kma_hits$marker, sep = "|"))) {
+    stop("Duplicate sample-marker rows found in raw KMA workbook.")
+  }
+  if (any(!is.finite(kma_hits$breadth)) ||
+      any(kma_hits$breadth < 0 | kma_hits$breadth > 100)) {
+    stop("Invalid marker-reference coverage breadth values in raw KMA file.")
+  }
+  marker_wide <- kma_hits %>%
+    select(id, marker, breadth, depth) %>%
+    pivot_wider(names_from = marker, values_from = c(breadth, depth),
+                names_glue = "{marker}_{.value}")
 
+  if (any(!marker_wide$id %in% samples$id)) {
+    warning("KMA evidence for samples not in S1 will be excluded: ",
+            paste(setdiff(marker_wide$id, samples$id), collapse = ", "))
+  }
+  dat <- samples %>%
+    left_join(marker_wide, by = "id") %>%
+    mutate(
+      is900_breadth = coalesce(is900_breadth, 0),
+      f57_breadth = coalesce(f57_breadth, 0),
+      is900_depth = coalesce(is900_depth, 0),
+      f57_depth = coalesce(f57_depth, 0),
+      is900 = is900_breadth >= 90,
+      f57 = f57_breadth >= 90,
       either = is900 | f57,
       both = is900 & f57,
-
-      is900_depth = ifelse(
-        !is900 & is.na(is900_depth),
-        0, is900_depth
-      ),
-
-      f57_depth = ifelse(
-        !f57 & is.na(f57_depth),
-        0, f57_depth
-      ),
-
-      is900_breadth = ifelse(
-        !is900 & is.na(is900_breadth),
-        0, is900_breadth
-      ),
-
-      f57_breadth = ifelse(
-        !f57 & is.na(f57_breadth),
-        0, f57_breadth
-      )
+      conventional_positive = is_positive(qpcr) | is_positive(culture)
     )
+
+  positive_s1 <- dat %>% filter(conventional_positive)
+  cat("KMA threshold: >=90% of marker reference sequence covered.\n")
+  cat("Conventionally positive (all available S1 samples): ",
+      nrow(positive_s1), "; either marker: ", sum(positive_s1$either),
+      "; both: ", sum(positive_s1$both), "\n", sep = "")
+  if (nrow(positive_s1) != 34L || sum(positive_s1$either) != 21L ||
+      sum(positive_s1$both) != 15L) {
+    warning("KMA counts differ from reported 34 / 21 / 15. Check input versions and IDs.")
+  }
 
   write_csv(
     dat,
