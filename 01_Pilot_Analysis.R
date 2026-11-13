@@ -1,4 +1,4 @@
-# 01_Pilot_Analysis.R: paired pilot taxonomy and diversity
+# 01_Pilot_Analysis.R for methodological validation: paired taxonomy and diversity
 # See README.md for inputs, provenance and validation status.
 
 # Pilot taxonomic composition (original and renormalised)
