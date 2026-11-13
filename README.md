@@ -15,7 +15,7 @@ Analysis scripts supporting a study of bovine faecal microbiota and *Mycobacteri
 
 ## Input data and folder layout
 
-**The study input tables are intended to be deposited on Zenodo: __________
+**The study input tables are intended to be deposited on Zenodo: doi:
 
 Download the Zenodo `data.zip` and extract it at the **GitHub repository root** so that there is a `data/` directory alongside the `.R` files. The scripts use the original, descriptive filenames in the ZIP; **do not rename these files**. See the separate Zenodo `README_DATA.md` for formats, lineage naming and the metadata requirements.
 
@@ -63,6 +63,7 @@ Scripts generate their outputs in separate analysis-specific folders. For standa
 
 Required packages across the scripts include `tidyverse`, `readxl`, `readr`, `openxlsx`, `writexl`, `vegan`, `ape`, `patchwork`, `indicspecies`, `permute`, and `broom`. Record `sessionInfo()` after a successful reproduction.
 
+To run script 06, download Supplementary Table S1 from the article's supplementary files, save the unmodified workbook as `data/map_detection/S1_Sample_Master.xlsx`, and run the script from the repository root.
 
 ## Authorship and provenance
 
