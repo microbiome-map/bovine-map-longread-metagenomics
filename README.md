@@ -13,6 +13,7 @@ Analysis scripts supporting a study of bovine faecal microbiota and *Mycobacteri
 | `05_IndVal.R` | Indicator taxa with `indicspecies::multipatt` |
 | `06_KMA_MAP_Detection.R` | IS900/F57 marker detection and association with diagnostics/sequencing yield |
 | `07_Farm_Adjusted_Analyses.R` | Farm-adjusted sensitivity analyses for beta diversity and indicator taxa (farm-level exact permutation) |
+| `08_Farm_Adjusted_Alpha_Diversity.R` | Farm-adjusted sensitivity analyses for alpha diversity (farm-level permutation, farm means, optional mixed model) |
 
 ## Input data and folder layout
 
@@ -29,6 +30,7 @@ repository/
 ├── 05_IndVal.R
 ├── 06_KMA_MAP_Detection.R
 ├── 07_Farm_Adjusted_Analyses.R
+├── 08_Farm_Adjusted_Alpha_Diversity.R
 ├── README.md
 └── data/                                
     ├── metadata.txt
@@ -60,11 +62,12 @@ source("04_Beta_Diversity.R")
 source("05_IndVal.R")
 source("06_KMA_MAP_Detection.R")
 source("07_Farm_Adjusted_Analyses.R")
+source("08_Farm_Adjusted_Alpha_Diversity.R")
 ```
 
 Scripts generate their outputs in separate analysis-specific folders. For standalone execution, e.g. `Rscript 03_Alpha_Diversity.R`, launch from the repository root. Run alpha before beta if using its exported sample-inclusion QC file. The beta script can also determine the same inclusion set from metadata and the explicit exclusions.
 
-Required packages across the scripts include `tidyverse`, `readxl`, `readr`, `openxlsx`, `writexl`, `vegan`, `ape`, `patchwork`, `indicspecies`, `permute`, and `broom`. Record `sessionInfo()` after a successful reproduction.
+Required packages across the scripts include `tidyverse`, `readxl`, `readr`, `openxlsx`, `writexl`, `vegan`, `ape`, `patchwork`, `indicspecies`, `permute`, and `broom`; `lme4` is optional for script 08. Record `sessionInfo()` after a successful reproduction.
 
 To run script 06, download Supplementary Table S1 from the article's supplementary files, save the unmodified workbook as `data/map_detection/S1_Sample_Master.xlsx`, and run the script from the repository root.
 
