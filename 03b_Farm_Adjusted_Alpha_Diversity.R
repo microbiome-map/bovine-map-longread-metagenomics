@@ -1,4 +1,4 @@
-# 08_Farm_Adjusted_Alpha_Diversity.R
+# 03b_Farm_Adjusted_Alpha_Diversity.R
 # Farm-adjusted sensitivity analyses for alpha diversity (03).
 #
 # Usage in RStudio: set the working directory to the folder that CONTAINS the
@@ -7,7 +7,7 @@
 #
 # Alpha values are calculated exactly as in 03_Alpha_Diversity.R (MetaPhlAn GTDB
 # normalized profiles; observed richness, Shannon and Gini-Simpson; genus and
-# species). As in 07_Farm_Adjusted_Analyses.R, Swiss MAP-negative animals share
+# species). As in 04b_Farm_Adjusted_Beta_IndVal.R, Swiss MAP-negative animals share
 # no farm with MAP-positive animals, so the analyses are:
 #   Reference: Kruskal-Wallis across the three Swiss MAP groups (as in 03).
 #   A. Linear model value ~ Farm + MAP_group; the MAP_group term can only use

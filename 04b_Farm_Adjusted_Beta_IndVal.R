@@ -1,4 +1,4 @@
-# 07_Farm_Adjusted_Analyses.R
+# 04b_Farm_Adjusted_Beta_IndVal.R
 # Farm-adjusted sensitivity analyses for beta diversity (04) and indicator taxa (05).
 #
 # Usage in RStudio: set the working directory to the folder that CONTAINS the
