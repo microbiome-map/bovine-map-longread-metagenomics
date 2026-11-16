@@ -15,7 +15,7 @@ Analysis scripts supporting a study of bovine faecal microbiota and *Mycobacteri
 
 ## Input data and folder layout
 
-**The study input tables are deposited on Zenodo: 10.5281/zenodo.24200566
+**The study input tables are deposited on Zenodo:** 10.5281/zenodo.24200566
 
 Download the Zenodo `data.zip` and extract it at the **GitHub repository root** so that there is a `data/` directory alongside the `.R` files. The scripts use the original, descriptive filenames in the ZIP; **do not rename these files**. See the separate Zenodo `README_DATA.md` for formats, lineage naming and the metadata requirements.
 
