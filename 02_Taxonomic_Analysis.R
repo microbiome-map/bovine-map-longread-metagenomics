@@ -26,7 +26,7 @@ local({
     "ZA_NEG", "ZA_SUB"
   )
 
-  excluded_ids <- c("ZA_NEG_01", "ZA_NEG_08")
+  excluded_ids <- c("SW_NEG_01", "ZA_NEG_01", "ZA_NEG_08")
   alpha <- 0.05
 
   original_units <- c(
@@ -1114,7 +1114,7 @@ local({
     "Sample inclusion",
     paste(
       "Metadata-eligible samples shared across all 12 input files;",
-      "MAP detection, EX, ZA_NEG_01 and ZA_NEG_08 excluded."
+      "MAP detection, EX, SW_NEG_01, ZA_NEG_01 and ZA_NEG_08 excluded."
     ),
 
     "Taxon inclusion",
