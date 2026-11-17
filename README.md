@@ -44,8 +44,8 @@ repository/
     │   ├── Kraken2_conf10/
     │   └── ganon2/
     └── map_detection/
-        ├── kma_IS900_F57_neu.xlsx         
-        └── map_detection_master.xlsx      
+        ├── kma_IS900_F57_neu.xlsx          (Zenodo)
+        └── S1_Sample_Master.xlsx           (Supplementary Table S1, see below)
 ```
 
 Each taxonomy folder contains prefixed abundance and normalised profiles, for example `MetaPhlAn_GTDB_Genus_abundance.tsv`, `MetaPhlAn_GTDB_Genus_normalized.tsv`, `MetaPhlAn_Genus_normalized.tsv` under MetaPhlAn_default, or `Kraken2_conf10_Species_normalized.tsv`. The ganon2 folder additionally contains three `*_counts.tsv` files.
@@ -70,6 +70,8 @@ Scripts generate their outputs in separate analysis-specific folders. For standa
 Required packages across the scripts include `tidyverse`, `readxl`, `readr`, `openxlsx`, `writexl`, `vegan`, `ape`, `patchwork`, `indicspecies`, `permute`, and `broom`; `lme4` is optional for script 03b. Record `sessionInfo()` after a successful reproduction.
 
 To run script 06, download Supplementary Table S1 from the article's supplementary files, save the unmodified workbook as `data/map_detection/S1_Sample_Master.xlsx`, and run the script from the repository root.
+
+Script 06 calls a marker detected when KMA covers at least 90% of the marker reference sequence (`breadth_threshold`). Comparator status is taken at sample level from S1: a sample is reference-positive if its study qPCR or culture was positive, and reference-negative if it had a negative qPCR or culture result and no positive one. Reference-negative samples are reported in two sets: animals from herds without known MAP history (primary) and samples from previously test-positive animals (secondary). Samples without a study qPCR or culture result are not used for agreement. Besides the Wilcoxon, Spearman and logistic-regression results, the script writes `kma_agreement.csv` (PPA/NPA with exact 95% CIs), `detection_by_group.csv`, `detection_by_ct_bin_descriptive.csv` (equal-width Ct bins, descriptive only), `kma_reported_hits_qc.csv` (breadth, depth and identity of every reported hit) and `kma_threshold_sensitivity.csv` (any reported hit, ≥50% and ≥90% breadth).
 
 ## Authorship and provenance
 
