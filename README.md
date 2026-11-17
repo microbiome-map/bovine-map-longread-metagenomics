@@ -73,6 +73,10 @@ To run script 06, download Supplementary Table S1 from the article's supplementa
 
 Script 06 calls a marker detected when KMA covers at least 90% of the marker reference sequence (`breadth_threshold`). Comparator status is taken at sample level from S1: a sample is reference-positive if its study qPCR or culture was positive, and reference-negative if it had a negative qPCR or culture result and no positive one. Reference-negative samples are reported in two sets: animals from herds without known MAP history (primary) and samples from previously test-positive animals (secondary). Samples without a study qPCR or culture result are not used for agreement. Besides the Wilcoxon, Spearman and logistic-regression results, the script writes `kma_agreement.csv` (PPA/NPA with exact 95% CIs), `detection_by_group.csv`, `detection_by_ct_bin_descriptive.csv` (equal-width Ct bins, descriptive only), `kma_reported_hits_qc.csv` (breadth, depth and identity of every reported hit) and `kma_threshold_sensitivity.csv` (any reported hit, ≥50% and ≥90% breadth).
 
+## SNP position check
+
+`snp_verification/check_snp_positions.py` (Python) checks the positions of a SNP table against the reads of the corresponding BAM files and flags positions inside deletions or with mixed base signals. See `snp_verification/README.md`.
+
 ## Authorship and provenance
 
 These analysis scripts were written with assistance from ChatGPT (OpenAI), reviewed by the first author, and consolidated for publication. Figure formatting may differ from manuscript illustrations.
