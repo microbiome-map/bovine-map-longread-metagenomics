@@ -748,7 +748,10 @@ eligible_farms <- farm_counts %>%
 farm_data <- swiss_primary %>%
   filter(Farm_number %in% eligible_farms)
 
-# Clinical singleton farms are excluded automatically.
+# Farms are eligible with >= min_farm_n animals in any Swiss MAP group.
+# Animals from other MAP groups on an eligible farm (e.g. single clinical
+# animals on farms 6 and 7) remain in the overall farm test; clinical
+# animals from unreplicated farms are excluded.
 
 farm_overall <- farm_data %>%
   group_by(Rank, Metric) %>%
@@ -779,8 +782,12 @@ farm_within_pairwise <- list()
 
 for (grp in c("SW_NEG", "SW_SUB")) {
 
+  # Within-group tests require >= min_farm_n animals per farm in this group.
   d <- farm_data %>%
-    filter(Cohort_group == grp)
+    filter(Cohort_group == grp) %>%
+    group_by(Rank, Metric, Farm_number) %>%
+    filter(n() >= min_farm_n) %>%
+    ungroup()
 
   farm_within_overall[[grp]] <- d %>%
     group_by(Rank, Metric) %>%
@@ -1221,6 +1228,9 @@ for (grp in c("SW_NEG", "SW_SUB")) {
 
   d <- farm_plot_data %>%
     filter(Cohort_group == grp) %>%
+    group_by(Rank, Metric, Farm_number) %>%
+    filter(n() >= min_farm_n) %>%
+    ungroup() %>%
     mutate(
       Farm_label = droplevels(Farm_label)
     )

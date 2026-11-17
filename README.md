@@ -9,13 +9,15 @@ Analysis scripts supporting a study of bovine faecal microbiota and *Mycobacteri
 | `01_Pilot_Analysis.R` | Paired 0/24 h pilot taxonomic composition, alpha and beta diversity |
 | `02_Taxonomic_Analysis.R` | Taxonomic composition, differential-abundance analyses, five-classifier comparison |
 | `03_Alpha_Diversity.R` | Alpha diversity, MAP-status, farm and classifier comparisons |
+| `03b_Farm_Adjusted_Alpha_Diversity.R` | Farm-adjusted sensitivity analyses for alpha diversity (farm-level permutation, farm means, optional mixed model) |
 | `04_Beta_Diversity.R` | Bray–Curtis, PCoA, PERMANOVA, dispersion, farms and classifier comparisons |
+| `04b_Farm_Adjusted_Beta_IndVal.R` | Farm-adjusted sensitivity analyses for beta diversity and indicator taxa (farm-level exact permutation) |
 | `05_IndVal.R` | Indicator taxa with `indicspecies::multipatt` |
 | `06_KMA_MAP_Detection.R` | IS900/F57 marker detection and association with diagnostics/sequencing yield |
 
 ## Input data and folder layout
 
-**The study input tables are deposited on Zenodo: 10.5281/zenodo.24200566
+**The study input tables are deposited on Zenodo:** 10.5281/zenodo.24200566
 
 Download the Zenodo `data.zip` and extract it at the **GitHub repository root** so that there is a `data/` directory alongside the `.R` files. The scripts use the original, descriptive filenames in the ZIP; **do not rename these files**. See the separate Zenodo `README_DATA.md` for formats, lineage naming and the metadata requirements.
 
@@ -24,7 +26,9 @@ repository/
 ├── 01_Pilot_Analysis.R
 ├── 02_Taxonomic_Analysis.R
 ├── 03_Alpha_Diversity.R
+├── 03b_Farm_Adjusted_Alpha_Diversity.R
 ├── 04_Beta_Diversity.R
+├── 04b_Farm_Adjusted_Beta_IndVal.R
 ├── 05_IndVal.R
 ├── 06_KMA_MAP_Detection.R
 ├── README.md
@@ -54,14 +58,16 @@ From the repository root in R, with the required packages installed:
 source("01_Pilot_Analysis.R")
 source("02_Taxonomic_Analysis.R")
 source("03_Alpha_Diversity.R")
+source("03b_Farm_Adjusted_Alpha_Diversity.R")
 source("04_Beta_Diversity.R")
+source("04b_Farm_Adjusted_Beta_IndVal.R")
 source("05_IndVal.R")
 source("06_KMA_MAP_Detection.R")
 ```
 
 Scripts generate their outputs in separate analysis-specific folders. For standalone execution, e.g. `Rscript 03_Alpha_Diversity.R`, launch from the repository root. Run alpha before beta if using its exported sample-inclusion QC file. The beta script can also determine the same inclusion set from metadata and the explicit exclusions.
 
-Required packages across the scripts include `tidyverse`, `readxl`, `readr`, `openxlsx`, `writexl`, `vegan`, `ape`, `patchwork`, `indicspecies`, `permute`, and `broom`. Record `sessionInfo()` after a successful reproduction.
+Required packages across the scripts include `tidyverse`, `readxl`, `readr`, `openxlsx`, `writexl`, `vegan`, `ape`, `patchwork`, `indicspecies`, `permute`, and `broom`; `lme4` is optional for script 03b. Record `sessionInfo()` after a successful reproduction.
 
 To run script 06, download Supplementary Table S1 from the article's supplementary files, save the unmodified workbook as `data/map_detection/S1_Sample_Master.xlsx`, and run the script from the repository root.
 

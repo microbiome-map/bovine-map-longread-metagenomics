@@ -64,8 +64,11 @@ local({
     metadata %>% transmute(raw_id = trimws(SAMPLE_ID), id = trimws(SAMPLE_ID))
   ) %>%
     filter(!is.na(raw_id), nzchar(raw_id)) %>%
-    distinct(raw_id, .keep_all = TRUE)
-  if (anyDuplicated(id_lookup$raw_id)) stop("Duplicate raw KMA identifiers in metadata.")
+    distinct(raw_id, id)
+  # Identical raw_id -> id pairs are collapsed above; a raw identifier that
+  # still maps to more than one sample is ambiguous.
+  if (anyDuplicated(id_lookup$raw_id)) stop("Ambiguous raw KMA identifiers in metadata: ",
+    paste(unique(id_lookup$raw_id[duplicated(id_lookup$raw_id)]), collapse = ", "))
 
   # S1 is published separately with the article, not part of the Zenodo archive.
   s1 <- readxl::read_excel(s1_file, sheet = 1, skip = 4)
