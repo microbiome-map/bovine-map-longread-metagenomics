@@ -77,9 +77,11 @@ Script 06 calls a marker detected when KMA covers at least 90% of the marker ref
 
 `snp_verification/check_snp_positions.py` (Python) checks the positions of a SNP table against the reads of the corresponding BAM files and flags positions inside deletions or with mixed base signals. See `snp_verification/README.md`.
 
+For the published SNP distances, positions classified as deletions (`-`) or ambiguous (`N`) were excluded, and the SNP distance between two samples is the number of positions at which both carry an unambiguous base (A/C/G/T) and the bases differ; insertions and deletions are not counted. Positions within the structurally complex region CP033688.1:1,790,000–1,890,710 (split alignments) were masked and excluded from the distances. These two steps are not performed by `check_snp_positions.py` and were applied to its corrected output table.
+
 ## Authorship and provenance
 
-These analysis scripts were written with assistance from ChatGPT (OpenAI), reviewed by the first author, and consolidated for publication. Figure formatting may differ from manuscript illustrations.
+These analysis scripts were written with assistance from ChatGPT (OpenAI) and Claude (Anthropic), reviewed by the first author, and consolidated for publication. Figure formatting may differ from manuscript illustrations.
 
 ## Citations
 
