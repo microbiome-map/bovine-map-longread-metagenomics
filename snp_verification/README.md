@@ -31,6 +31,12 @@ pip install pysam numpy
 python genome_wide_compare.py --bam isolate=isolate_nodup.bam --bam metagenome=metagenome_nodup.bam \
   --contig CP033688.1 --outdir gw_isolate_vs_metagenome      # add --max-de 0.03 for a stricter run
 ```
+**Input order matters.** Give `--bam` exactly twice, each as `NAME=PATH` (no spaces around `=`):
+first the **isolate** (sample A), then the **metagenome** (sample B). The `--contig` value is the
+sequence name in the BAM header (e.g. `CP033688.1`), not the FASTA file. The consensus comparison
+gives the same result in either order, but `minor_alleles.tsv` and the last line of `summary.txt`
+only report extra bases in sample B, so with the metagenome second they show bases present in the
+metagenome but absent from the isolate.
 
 Outputs: `summary.txt`, `differences.tsv`, `minor_alleles.tsv`, and cached per-chunk counts in `counts/` (an interrupted run resumes where it stopped). Options: `--min-mapq`, `--max-de`, `--min-aln-len`, `--min-depth`, `--min-frac`, `--minor-frac`, `--minor-reads`.
 
