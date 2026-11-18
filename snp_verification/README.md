@@ -40,6 +40,27 @@ metagenome but absent from the isolate.
 
 Outputs: `summary.txt`, `differences.tsv`, `minor_alleles.tsv`, and cached per-chunk counts in `counts/` (an interrupted run resumes where it stopped). Options: `--min-mapq`, `--max-de`, `--min-aln-len`, `--min-depth`, `--min-frac`, `--minor-frac`, `--minor-reads`.
 
+## High-identity reads at ambiguous positions
+
+`count_high_identity_reads.py` counts, at selected positions, how many reads carry an expected base (e.g. the isolate base), separately for all reads and for reads with low per-read divergence (`de` < 0.10 by default), with and without restriction to primary alignments and MAPQ >= 20. It was used for the 22 positions with mixed base signals in the metagenome Dia5 (`mixed_positions_Dia5.tsv`, isolate 26-127 bases).
+
+```
+python count_high_identity_reads.py --bam metagenome_nodup.bam \
+  --positions mixed_positions_Dia5.tsv --contig CP033688.1 --out high_identity_counts.tsv
+```
+
+## Per-read divergence histogram
+
+`extract_read_divergence.py` writes the per-read divergence (minimap2 `de` tag) of all mapped, non-duplicate reads of a BAM file; `plot_read_divergence.R` (R, ggplot2) plots one histogram per sample (primary alignments, log-scaled counts, dashed lines at 3 % and 10 %) and writes a summary table with the share of reads below each threshold. The plot shows whether a divergence threshold separates target-organism reads from reads of other taxa.
+
+```
+python extract_read_divergence.py isolate_nodup.bam isolate isolate_de.tsv
+python extract_read_divergence.py metagenome_nodup.bam metagenome metagenome_de.tsv
+cat isolate_de.tsv > read_divergence.tsv; tail -n +2 metagenome_de.tsv >> read_divergence.tsv
+Rscript plot_read_divergence.R read_divergence.tsv read_divergence_histogram \
+  "isolate=Isolate;metagenome=Metagenome"
+```
+
 ## Provenance
 
 These scripts were written with assistance from Claude (Anthropic) and reviewed by the author.
