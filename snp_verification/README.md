@@ -22,6 +22,18 @@ python check_snp_positions.py --table SNP_table.xlsx \
 
 BAM files must be sorted and indexed (`.bai`). Thresholds can be changed with `--min-depth`, `--del-frac` and `--mixed-frac`. Duplicate reads were removed before this step; pileup uses pysam's default read filters.
 
+## Genome-wide comparison
+
+`genome_wide_compare.py` compares two samples (e.g. an isolate and its matched metagenome) at every reference position, not only at the positions of a SNP table. Only reads that clearly come from the target organism are used: primary alignments with MAPQ >= 20 and minimap2 per-read divergence (`de` tag) < 0.10 (adjustable). A consensus base is called where at least 10 filtered reads are present and one base reaches at least 80 %; consensus bases are compared wherever both samples have one. Positions where the second sample carries an additional base (>= 10 %, >= 3 reads) absent from the first are listed for inspection in IGV. Indels are not assessed.
+
+```
+pip install pysam numpy
+python genome_wide_compare.py --bam isolate=isolate_nodup.bam --bam metagenome=metagenome_nodup.bam \
+  --contig CP033688.1 --outdir gw_isolate_vs_metagenome      # add --max-de 0.03 for a stricter run
+```
+
+Outputs: `summary.txt`, `differences.tsv`, `minor_alleles.tsv`, and cached per-chunk counts in `counts/` (an interrupted run resumes where it stopped). Options: `--min-mapq`, `--max-de`, `--min-aln-len`, `--min-depth`, `--min-frac`, `--minor-frac`, `--minor-reads`.
+
 ## Provenance
 
-This script was written with assistance from Claude (Anthropic) and reviewed by the author.
+These scripts were written with assistance from Claude (Anthropic) and reviewed by the author.
